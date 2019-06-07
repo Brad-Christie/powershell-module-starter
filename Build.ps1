@@ -28,10 +28,10 @@ Begin {
   $ProgressPreference = "Continue"
   
   # Store some common paths
-  $ModuleName = "PowershellModuleStarter"
   $ModuleDestinationPath = Join-Path $PSScriptRoot -ChildPath "dist"
   $ModuleSourcePath = Join-Path $PSScriptRoot -ChildPath "src"
   $ModuleTestsPath = Join-Path $PSScriptRoot -ChildPath "test"
+  $ModuleName = Get-Item "${ModuleSourcePath}\*.psm1" | Select-Object -ExpandProperty "BaseName"
 }
 Process {
   . (Join-Path $PSScriptRoot -ChildPath "Build.Util.ps1")
