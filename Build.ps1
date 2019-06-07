@@ -6,6 +6,9 @@ Param(
   [Parameter(ParameterSetName = "__Build")]
   [switch]$Build
   ,
+  [Parameter(ParameterSetName = "__Build")]
+  [switch]$WithDocker
+  ,
   [Parameter(ParameterSetName = "__Clean")]
   [switch]$Clean
   ,
@@ -44,17 +47,38 @@ Process {
       Break
     }
     "__Build" {
-      Write-Host "Cleaning..."
-      CleanModuleBuild -OutputPath $ModuleDestinationPath
-      Write-Host "Clean complete"
+      If ($WithDocker) {
+        Write-Host "Building (in docker)..."
 
-      Write-Host "Testing..."
-      TestModule -Source $ModuleSourcePath -TestsSource $ModuleTestsPath
-      Write-Host "Tests complete"
+        $tag = "{0}_build" -f $ModuleName.ToLower()
+        @(
+          '# escape=`'
+          'FROM mcr.microsoft.com/windows/servercore:ltsc2016'
+          'SHELL ["powershell.exe", "-Command", "$ErrorActionPreference=''{0}'';$ProgressPreference=''{1}'';"]' -f $ErrorActionPreference, $ProgressPreference
+          'WORKDIR /build'
+          'COPY ./Build.ps1 ./Build.Util.ps1 ./'
+          'RUN .\Build.ps1 -Bootstrap'
+          'COPY . .'
+          'RUN .\Build.ps1 -Build'
+        ) | Out-String | & docker build --tag $tag -f - $PSScriptRoot
+        If ($LASTEXITCODE -ne 0) {
+          Write-Error "Build failed"
+        } Else {
+          Write-Host "Build complete"
+        }
+      } Else {
+        Write-Host "Cleaning..."
+        CleanModuleBuild -OutputPath $ModuleDestinationPath
+        Write-Host "Clean complete"
 
-      Write-Host "Building..."
-      BuildModule -Source $ModuleSourcePath -OutputPath $ModuleDestinationPath
-      Write-Host "Build complete"
+        Write-Host "Testing..."
+        TestModule -Source $ModuleSourcePath -TestsSource $ModuleTestsPath
+        Write-Host "Tests complete"
+
+        Write-Host "Building..."
+        BuildModule -Source $ModuleSourcePath -OutputPath $ModuleDestinationPath
+        Write-Host "Build complete"
+      }
       Break
     }
     "__Clean" {

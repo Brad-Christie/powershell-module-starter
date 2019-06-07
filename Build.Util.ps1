@@ -164,7 +164,7 @@ Function LoadModule {
   Process {
     If ($PSCmdlet.ShouldProcess($Source, "Assemble module")) {
       $ModuleSource = "Set-StrictMode -Version Latest`n"
-      $ModuleSource += Get-ChildItem $ModuleSourcePath -File -Include "*.ps1" -Recurse | Get-Content -Delimiter ([char]0)
+      $ModuleSource += Get-ChildItem $ModuleSourcePath -File -Include "*.ps1" -Recurse | Get-Content -Delimiter ([System.Environment]::NewLine)
       $ModuleSource += "Export-ModuleMember -Function *"
     }
     If ($PSCmdlet.ShouldProcess($ModuleName, "Load module")) {
