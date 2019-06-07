@@ -27,7 +27,6 @@ Begin {
   $ErrorActionPreference = "Stop"
   $ProgressPreference = "Continue"
   
-  
   # Store some common paths
   $ModuleName = "PowershellModuleStarter"
   $ModuleDestinationPath = Join-Path $PSScriptRoot -ChildPath "dist"

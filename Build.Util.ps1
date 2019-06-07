@@ -112,10 +112,10 @@ Function BuildModule {
         ModuleVersion = [version]($version.Major, $version.Minor, $version.Build, $revision -join ".")
       }
       If ($scriptsToProcess.Length -gt 0) {
-        ScriptsToProcess = $scriptsToProcess
+        $updateParams.Add("ScriptsToProcess", $scriptsToProcess)
       }
       If ($functionsToExport.Length -gt 0) {
-        FunctionsToExport = $functionsToExport
+        $updateParams.Add("FunctionsToExport", $functionsToExport)
       }
 
       Update-ModuleManifest @updateParams
@@ -223,9 +223,9 @@ Function TestModule {
         LoadModule -Source $Source -As $moduleName
 
         If ($Detailed) {
-          Invoke-Pester -Path $Source
+          Invoke-Pester -Path $TestsSource
         } Else {
-          Invoke-Pester -Path $Source -Show "Summary", "Failed"
+          Invoke-Pester -Path $TestsSource -Show "Summary", "Failed"
         }
       } Finally {
         UnloadModule -ModuleName $moduleName
